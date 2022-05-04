@@ -1,0 +1,26 @@
+type Query {
+    findAccountById(id: ID!): Account
+    getAllAccounts: [Account]!
+}
+
+type Mutation {
+    createAccount(account: AccountInput!): Account
+    updateAccount(id: ID!, account: AccountInput!): Account
+    closeAccount(id: ID!): Account
+}
+
+type Account {
+    id: ID!
+    name: String!
+    tags: [String]!
+    balance: Float!
+    comment: String
+    disabled: Boolean!
+}
+
+input AccountInput {
+    name: String!
+    tags: [String]!
+    comment: String
+    disabled: Boolean
+}

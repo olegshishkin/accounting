@@ -1,0 +1,7 @@
+logging:
+  level:
+    io.github.olegshishkin: trace
+    org.springframework.data.mongodb: debug
+spring:
+  graphql:
+    path: /graphql

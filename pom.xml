@@ -5,17 +5,138 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.olegshishkin.accounting</groupId>
   <artifactId>accounting-parent</artifactId>
-  <packaging>pom</packaging>
   <version>0.0.1</version>
   <name>accounting-parent</name>
   <description>Accounting project</description>
+  <packaging>pom</packaging>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.6.7</version>
+    <relativePath/>
+  </parent>
+
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
       <url>https://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
+
   <scm>
     <url>https://github.com/olegshishkin/accounting.git</url>
   </scm>
+
+  <modules>
+    <module>accounts</module>
+  </modules>
+
+  <properties>
+    <java.version>17</java.version>
+    <jib.skip>true</jib.skip>
+    <jib.from.image>openjdk:${java.version}-jdk-alpine</jib.from.image>
+
+    <!-- dependency's version -->
+    <spring.boot.graphql.version>1.0.0-M4</spring.boot.graphql.version>
+    <mapstruct.version>1.4.2.Final</mapstruct.version>
+    <graphql.codegen.plugin.version>5.4.0</graphql.codegen.plugin.version>
+    <jib.plugin.version>3.2.1</jib.plugin.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/milestone</url>
+    </repository>
+  </repositories>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.experimental</groupId>
+        <artifactId>graphql-spring-boot-starter</artifactId>
+        <version>${spring.boot.graphql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mapstruct</groupId>
+        <artifactId>mapstruct</artifactId>
+        <version>${mapstruct.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>io.github.kobylynskyi</groupId>
+          <artifactId>graphql-codegen-maven-plugin</artifactId>
+          <version>${graphql.codegen.plugin.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>generate</goal>
+              </goals>
+              <configuration>
+                <outputDir>${project.build.directory}/generated-sources/graphql</outputDir>
+                <packageName>${project.groupId}.${project.artifactId}.model.graphql</packageName>
+                <modelNameSuffix>DTO</modelNameSuffix>
+                <generateBuilder>false</generateBuilder>
+                <generateToString>true</generateToString>
+                <addGeneratedAnnotation>false</addGeneratedAnnotation>
+                <generateApis>false</generateApis>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>com.google.cloud.tools</groupId>
+          <artifactId>jib-maven-plugin</artifactId>
+          <version>${jib.plugin.version}</version>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>build</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <from>
+              <image>${jib.from.image}</image>
+            </from>
+            <to>
+              <image>${jib.to.registry}/${project.artifactId}:${project.version}</image>
+              <credHelper>${jib.to.credHelper}</credHelper>
+            </to>
+            <container>
+              <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+              <ports>
+                <port>8080</port>
+              </ports>
+            </container>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>jib</id>
+      <properties>
+        <jib.skip>false</jib.skip>
+      </properties>
+    </profile>
+  </profiles>
 </project>

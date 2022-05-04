@@ -1,0 +1,21 @@
+extend type Query {
+    findOperations(filter: OperationFilter!): [Operation]!
+}
+
+type Operation {
+    id: ID!
+    transactionId: String!
+    account: OperationAccount!
+    amount: Float!
+}
+
+# Projection of 'Account' from account.graphqls
+type OperationAccount {
+    id: ID!
+    name: String!
+}
+
+input OperationFilter {
+    transactionId: String
+    accountId: String
+}

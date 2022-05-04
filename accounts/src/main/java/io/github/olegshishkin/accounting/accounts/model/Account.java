@@ -26,6 +26,7 @@ public class Account {
   public static Account create() {
     Account a = new Account();
     a.setBalance(ZERO);
+    a.setDisabled(false);
     return a;
   }
 }

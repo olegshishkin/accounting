@@ -22,5 +22,4 @@ input AccountInput {
     name: String!
     tags: [String]!
     comment: String
-    disabled: Boolean
 }

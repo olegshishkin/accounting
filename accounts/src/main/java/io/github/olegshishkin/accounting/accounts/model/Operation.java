@@ -16,6 +16,7 @@ public class Operation {
   private String id;
   @Indexed
   private String transactionId;
+  private String messageId;
   private OperationAccount account;
   private BigDecimal amount;
 

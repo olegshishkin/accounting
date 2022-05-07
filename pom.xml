@@ -5,17 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.olegshishkin.accounting</groupId>
   <artifactId>accounting-parent</artifactId>
-  <version>0.0.1</version>
+  <version>${revision}</version>
   <name>accounting-parent</name>
   <description>Accounting project</description>
   <packaging>pom</packaging>
-
-  <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.6.7</version>
-    <relativePath/>
-  </parent>
 
   <licenses>
     <license>
@@ -30,17 +23,25 @@
 
   <modules>
     <module>accounts</module>
+    <module>operation-messages</module>
   </modules>
 
   <properties>
+    <revision>0.0.1</revision>
     <java.version>17</java.version>
     <jib.skip>true</jib.skip>
     <jib.from.image>openjdk:${java.version}-jdk-alpine</jib.from.image>
 
     <!-- dependency's version -->
+    <spring.boot.version>2.6.7</spring.boot.version>
     <spring.boot.graphql.version>1.0.0-M4</spring.boot.graphql.version>
+    <lombok.version>1.18.24</lombok.version>
     <mapstruct.version>1.4.2.Final</mapstruct.version>
+    <jackson.version>2.13.2</jackson.version>
+    <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
+    <maven.resources.plugin.version>3.2.0</maven.resources.plugin.version>
     <graphql.codegen.plugin.version>5.4.0</graphql.codegen.plugin.version>
+    <jsonschema2pojo.plugin.version>1.1.2</jsonschema2pojo.plugin.version>
     <jib.plugin.version>3.2.1</jib.plugin.version>
   </properties>
 
@@ -60,9 +61,27 @@
         <version>${spring.boot.graphql.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>${lombok.version}</version>
+        <optional>true</optional>
+      </dependency>
+      <dependency>
         <groupId>org.mapstruct</groupId>
         <artifactId>mapstruct</artifactId>
         <version>${mapstruct.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring.boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -71,11 +90,41 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${spring.boot.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>repackage</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <excludes>
+              <exclude>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+              </exclude>
+            </excludes>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven.compiler.plugin.version}</version>
           <configuration>
             <source>${java.version}</source>
             <target>${java.version}</target>
+            <encoding>UTF-8</encoding>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${maven.resources.plugin.version}</version>
+          <configuration>
+            <encoding>UTF-8</encoding>
           </configuration>
         </plugin>
         <plugin>
@@ -87,17 +136,40 @@
               <goals>
                 <goal>generate</goal>
               </goals>
-              <configuration>
-                <outputDir>${project.build.directory}/generated-sources/graphql</outputDir>
-                <packageName>${project.groupId}.${project.artifactId}.model.graphql</packageName>
-                <modelNameSuffix>DTO</modelNameSuffix>
-                <generateBuilder>false</generateBuilder>
-                <generateToString>true</generateToString>
-                <addGeneratedAnnotation>false</addGeneratedAnnotation>
-                <generateApis>false</generateApis>
-              </configuration>
             </execution>
           </executions>
+          <configuration>
+            <outputDir>${project.build.directory}/generated-sources/graphql</outputDir>
+            <modelNameSuffix>DTO</modelNameSuffix>
+            <generateBuilder>false</generateBuilder>
+            <generateToString>true</generateToString>
+            <generateApis>false</generateApis>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.jsonschema2pojo</groupId>
+          <artifactId>jsonschema2pojo-maven-plugin</artifactId>
+          <version>${jsonschema2pojo.plugin.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>generate</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <sourceDirectory>${basedir}/src/main/resources/schema/json</sourceDirectory>
+            <dateTimeType>java.time.Instant</dateTimeType>
+            <generateBuilders>true</generateBuilders>
+            <includeAdditionalProperties>false</includeAdditionalProperties>
+            <includeAllPropertiesConstructor>false</includeAllPropertiesConstructor>
+            <includeHashcodeAndEquals>false</includeHashcodeAndEquals>
+            <includeSetters>false</includeSetters>
+            <includeTypeInfo>true</includeTypeInfo>
+            <serializable>true</serializable>
+            <useBigDecimals>true</useBigDecimals>
+            <useInnerClassBuilders>true</useInnerClassBuilders>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>com.google.cloud.tools</groupId>

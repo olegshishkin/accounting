@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "/schemas/commands/deleteCmd",
+  "title": "Operation deletion command",
+  "type": "object",
+  "javaInterfaces": ["io.github.olegshishkin.accounting.operation.messages.events.TransactionIdAware"],
+  "required": [
+    "header",
+    "transactionId"
+  ],
+  "properties": {
+    "header": {
+      "$ref": "../header.json"
+    },
+    "transactionId": {
+      "$ref": "../commonDefs.json#/definitions/transactionId"
+    }
+  }
+}

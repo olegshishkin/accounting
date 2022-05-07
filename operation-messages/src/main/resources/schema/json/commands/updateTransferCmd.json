@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "/schemas/commands/updateTransferCmd",
+  "title": "Command of a transfer operation updating",
+  "type": "object",
+  "javaInterfaces": ["io.github.olegshishkin.accounting.operation.messages.events.TransactionIdAware"],
+  "required": [
+    "header",
+    "transactionId",
+    "fromAccountId",
+    "toAccountId",
+    "amount"
+  ],
+  "properties": {
+    "header": {
+      "$ref": "../header.json"
+    },
+    "transactionId": {
+      "$ref": "../commonDefs.json#/definitions/transactionId"
+    },
+    "fromAccountId": {
+      "$ref": "../commonDefs.json#/definitions/accountId"
+    },
+    "toAccountId": {
+      "$ref": "../commonDefs.json#/definitions/accountId"
+    },
+    "amount": {
+      "$ref": "../commonDefs.json#/definitions/amount"
+    }
+  }
+}

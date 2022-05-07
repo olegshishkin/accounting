@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "/schemas/events/operationCompletedEvt",
+  "title": "Operation completed event",
+  "type": "object",
+  "javaInterfaces": ["io.github.olegshishkin.accounting.operation.messages.events.CommandAware"],
+  "required": [
+    "header",
+    "command"
+  ],
+  "properties": {
+    "header": {
+      "$ref": "../header.json"
+    },
+    "command": {
+      "oneOf": [
+        {
+          "$ref": "../commands/createDepositCmd.json"
+        },
+        {
+          "$ref": "../commands/createTransferCmd.json"
+        },
+        {
+          "$ref": "../commands/createWithdrawalCmd.json"
+        },
+        {
+          "$ref": "../commands/updateDepositCmd.json"
+        },
+        {
+          "$ref": "../commands/updateTransferCmd.json"
+        },
+        {
+          "$ref": "../commands/updateWithdrawalCmd.json"
+        },
+        {
+          "$ref": "../commands/deleteCmd.json"
+        }
+      ]
+    }
+  }
+}

@@ -7,7 +7,7 @@
   <parent>
     <groupId>io.github.olegshishkin.accounting</groupId>
     <artifactId>accounting-parent</artifactId>
-    <version>0.0.1</version>
+    <version>${revision}</version>
   </parent>
 
   <artifactId>accounts</artifactId>
@@ -48,7 +48,6 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -62,14 +61,6 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>
-              <groupId>org.projectlombok</groupId>
-              <artifactId>lombok</artifactId>
-            </exclude>
-          </excludes>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -93,6 +84,7 @@
         <groupId>io.github.kobylynskyi</groupId>
         <artifactId>graphql-codegen-maven-plugin</artifactId>
         <configuration>
+          <packageName>${project.groupId}.${project.artifactId}.model.graphql</packageName>
           <outputDir/> <!-- inherited -->
           <customTypesMapping>
             <Float>java.math.BigDecimal</Float>
@@ -107,7 +99,6 @@
           </customTypesMapping>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>jib-maven-plugin</artifactId>

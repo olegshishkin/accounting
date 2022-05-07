@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "/schemas/commands/updateWithdrawalCmd",
+  "title": "Command of a withdrawal operation updating",
+  "type": "object",
+  "javaInterfaces": ["io.github.olegshishkin.accounting.operation.messages.events.TransactionIdAware"],
+  "required": [
+    "header",
+    "transactionId",
+    "accountId",
+    "amount"
+  ],
+  "properties": {
+    "header": {
+      "$ref": "../header.json"
+    },
+    "transactionId": {
+      "$ref": "../commonDefs.json#/definitions/transactionId"
+    },
+    "accountId": {
+      "$ref": "../commonDefs.json#/definitions/accountId"
+    },
+    "amount": {
+      "$ref": "../commonDefs.json#/definitions/amount"
+    }
+  }
+}

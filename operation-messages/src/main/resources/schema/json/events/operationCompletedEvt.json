@@ -12,6 +12,10 @@
     "header": {
       "$ref": "../header.json"
     },
+    "isSuccess": {
+      "title": "Operation result",
+      "type": "boolean"
+    },
     "command": {
       "oneOf": [
         {

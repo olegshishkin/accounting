@@ -38,6 +38,7 @@
     <lombok.version>1.18.24</lombok.version>
     <mapstruct.version>1.4.2.Final</mapstruct.version>
     <jackson.version>2.13.2</jackson.version>
+    <aws.sqs.jms.lib.version>1.0.8</aws.sqs.jms.lib.version>
     <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
     <maven.resources.plugin.version>3.2.0</maven.resources.plugin.version>
     <graphql.codegen.plugin.version>5.4.0</graphql.codegen.plugin.version>
@@ -75,6 +76,12 @@
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
         <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>amazon-sqs-java-messaging-lib</artifactId>
+        <version>${aws.sqs.jms.lib.version}</version>
+        <type>jar</type>
       </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>

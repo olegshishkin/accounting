@@ -4,3 +4,24 @@ spring:
       uri: ${MONGO_URI}
   graphql:
     path:
+cloud:
+  aws:
+    region:
+      static: ${AWS_REGION}
+    credentials:
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
+    end-point:
+      uri: ${AWS_ENDPOINT}
+message:
+  concurrency: 10
+  queue:
+    CreateDepositCmd: CreateDepositQueue
+    CreateTransferCmd: CreateTransferQueue
+    CreateWithdrawalCmd: CreateWithdrawalQueue
+    DeleteCmd: DeleteQueue
+    UpdateDepositCmd: UpdateDepositQueue
+    UpdateTransferCmd: UpdateTransferQueue
+    UpdateWithdrawalCmd: UpdateWithdrawalQueue
+    OperationCompletedEvt: OperationCompletedQueue
+    OperationStartedEvt: OperationStartedQueue

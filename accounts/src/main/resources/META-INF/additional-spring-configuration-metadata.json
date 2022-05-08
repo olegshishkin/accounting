@@ -1,0 +1,49 @@
+{
+  "properties": [
+    {
+      "name": "message.queue.CreateDepositCmd",
+      "type": "java.lang.String",
+      "description": "CreateDepositCmd message queue name."
+    },
+    {
+      "name": "message.queue.CreateTransferCmd",
+      "type": "java.lang.String",
+      "description": "CreateTransferCmd message queue name."
+    },
+    {
+      "name": "message.queue.CreateWithdrawalCmd",
+      "type": "java.lang.String",
+      "description": "CreateWithdrawalCmd message queue name."
+    },
+    {
+      "name": "message.queue.DeleteCmd",
+      "type": "java.lang.String",
+      "description": "DeleteCmd message queue name."
+    },
+    {
+      "name": "message.queue.UpdateDepositCmd",
+      "type": "java.lang.String",
+      "description": "UpdateDepositCmd message queue name."
+    },
+    {
+      "name": "message.queue.UpdateTransferCmd",
+      "type": "java.lang.String",
+      "description": "UpdateTransferCmd message queue name."
+    },
+    {
+      "name": "message.queue.UpdateWithdrawalCmd",
+      "type": "java.lang.String",
+      "description": "UpdateWithdrawalCmd message queue name."
+    },
+    {
+      "name": "message.queue.OperationCompletedEvt",
+      "type": "java.lang.String",
+      "description": "OperationCompletedEvt message queue name."
+    },
+    {
+      "name": "message.queue.OperationStartedEvt",
+      "type": "java.lang.String",
+      "description": "OperationStartedEvt message queue name."
+    }
+  ]
+}

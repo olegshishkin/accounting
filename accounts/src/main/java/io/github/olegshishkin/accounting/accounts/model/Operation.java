@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import lombok.Data;
 import lombok.ToString;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -20,7 +19,6 @@ public class Operation {
 
   @Id
   private String id;
-  @CreatedDate
   private Instant createdAt;
   @Indexed
   private String transactionId;

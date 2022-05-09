@@ -99,7 +99,8 @@ class MessageQueueListenersTest {
         .expectNextMatches(o ->
             o.getTransactionId().equals(cmd.getTransactionId()) &&
                 o.getAccount().getName().equals(acc.getName()) &&
-                o.getAmount().equals(BigDecimal.valueOf(2.3)))
+                o.getAmount().equals(BigDecimal.valueOf(2.3)) &&
+                o.getCreatedAt() != null)
         .verifyComplete();
 
     StepVerifier.create(accountRepository.findById(savedAcc.getId()))

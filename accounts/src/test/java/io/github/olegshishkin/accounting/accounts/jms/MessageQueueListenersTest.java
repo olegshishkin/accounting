@@ -82,6 +82,7 @@ class MessageQueueListenersTest {
     acc.setName("accName1");
     acc.setBalance(acc.getBalance().add(BigDecimal.valueOf(4.5)));
     Account savedAcc = accountRepository.save(acc).block();
+    assert savedAcc != null;
 
     CreateDepositCmd cmd = new CreateDepositCmdBuilder()
         .withHeader(new HeaderBuilder().withId("id1").withTime(Instant.now()).build())

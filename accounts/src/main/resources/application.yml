@@ -1,7 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: ${MONGO_URI}
+      uri: ${MONGO_URI} # Make sure to add replicaSet to the MongoDB URI
   graphql:
     path:
 cloud:

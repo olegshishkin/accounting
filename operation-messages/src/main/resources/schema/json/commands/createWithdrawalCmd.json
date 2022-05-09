@@ -3,7 +3,10 @@
   "$id": "/schemas/commands/createWithdrawalCmd",
   "title": "Command of a withdrawal operation creation",
   "type": "object",
-  "javaInterfaces": ["io.github.olegshishkin.accounting.operation.messages.events.TransactionIdAware"],
+  "javaInterfaces": [
+    "io.github.olegshishkin.accounting.operation.messages.events.Command",
+    "io.github.olegshishkin.accounting.operation.messages.events.TransactionIdAware"
+  ],
   "required": [
     "header",
     "transactionId",

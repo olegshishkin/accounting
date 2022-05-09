@@ -3,7 +3,10 @@
   "$id": "/schemas/commands/deleteCmd",
   "title": "Operation deletion command",
   "type": "object",
-  "javaInterfaces": ["io.github.olegshishkin.accounting.operation.messages.events.TransactionIdAware"],
+  "javaInterfaces": [
+    "io.github.olegshishkin.accounting.operation.messages.events.Command",
+    "io.github.olegshishkin.accounting.operation.messages.events.TransactionIdAware"
+  ],
   "required": [
     "header",
     "transactionId"

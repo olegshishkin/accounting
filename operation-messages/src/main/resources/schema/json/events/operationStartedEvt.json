@@ -3,7 +3,10 @@
   "$id": "/schemas/events/operationStartedEvt",
   "title": "Operation started event",
   "type": "object",
-  "javaInterfaces": ["io.github.olegshishkin.accounting.operation.messages.events.CommandAware"],
+  "javaInterfaces": [
+    "io.github.olegshishkin.accounting.operation.messages.events.Event",
+    "io.github.olegshishkin.accounting.operation.messages.events.CommandAware"
+  ],
   "required": [
     "header",
     "command"

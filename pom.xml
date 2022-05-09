@@ -32,13 +32,16 @@
     <jib.skip>true</jib.skip>
     <jib.from.image>openjdk:${java.version}-jdk-alpine</jib.from.image>
 
-    <!-- dependency's version -->
+    <!-- dependency versions -->
+
     <spring.boot.version>2.6.7</spring.boot.version>
     <spring.boot.graphql.version>1.0.0-M4</spring.boot.graphql.version>
     <lombok.version>1.18.24</lombok.version>
     <mapstruct.version>1.4.2.Final</mapstruct.version>
     <jackson.version>2.13.2</jackson.version>
     <aws.sqs.jms.lib.version>1.0.8</aws.sqs.jms.lib.version>
+    <testcontainers.version>1.17.1</testcontainers.version>
+
     <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
     <maven.resources.plugin.version>3.2.0</maven.resources.plugin.version>
     <graphql.codegen.plugin.version>5.4.0</graphql.codegen.plugin.version>
@@ -82,6 +85,13 @@
         <artifactId>amazon-sqs-java-messaging-lib</artifactId>
         <version>${aws.sqs.jms.lib.version}</version>
         <type>jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${testcontainers.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>

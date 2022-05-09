@@ -4,6 +4,7 @@ extend type Query {
 
 type Operation {
     id: ID!
+    createdAt: String!
     transactionId: String!
     account: OperationAccount!
     amount: Float!

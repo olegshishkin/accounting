@@ -9,14 +9,19 @@ import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.olegshishkin.accounting.accounts.jms.JmsErrorHandler;
+import java.util.HashMap;
+import java.util.Map;
 import javax.jms.Session;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 
+@EnableJms
 @Configuration
 public class MessageQueueConfig {
 
@@ -75,5 +80,11 @@ public class MessageQueueConfig {
     factory.setMessageConverter(messageConverter);
     factory.setConcurrency(concurrency);
     return factory;
+  }
+
+  @ConfigurationProperties("message.queue")
+  @Bean
+  public Map<String, String> queueNames() {
+    return new HashMap<>();
   }
 }

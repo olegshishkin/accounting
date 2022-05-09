@@ -37,12 +37,14 @@ public class OperationServiceImpl implements OperationService {
   }
 
   @Override
-  public Mono<Operation> create(Operation o) {
+  public Mono<Operation> add(Operation o) {
+    String accountId = o.getAccount().getId();
     return ops.update(Account.class)
-        .matching(query(where("id").is(o.getAccount().getId())))
+        .matching(query(where("id").is(accountId)))
         .apply(new Update().inc("balance", o.getAmount()))
         .withOptions(FindAndModifyOptions.options().returnNew(true))
         .findAndModify()
+        .switchIfEmpty(Mono.error(() -> new IllegalArgumentException("No account " + accountId)))
         .doOnNext(account -> o.getAccount().setName(account.getName()))
         .then(ops.insert(o));
   }

@@ -1,6 +1,7 @@
 package io.github.olegshishkin.accounting.accounts.jms;
 
 import io.github.olegshishkin.accounting.accounts.events.OperationCompletedAppEvt;
+import io.github.olegshishkin.accounting.accounts.events.OperationFailedAppEvt;
 import io.github.olegshishkin.accounting.accounts.events.OperationStartedAppEvt;
 import io.github.olegshishkin.accounting.accounts.mapper.OperationMapper;
 import io.github.olegshishkin.accounting.accounts.model.Operation;
@@ -23,12 +24,12 @@ public class MessageQueueListeners {
 
   @JmsListener(destination = "${message.queue.CreateDepositCmd}")
   public void consumeCreateDepositQueue(CreateDepositCmd cmd) {
-    log.info("Create deposit for: {}", cmd);
+    log.debug("Create operation for: {}", cmd);
     publisher.publishEvent(new OperationStartedAppEvt<>(cmd));
     Operation o = mapper.map(cmd);
-    service.create(o)
-        .map(operation -> new OperationCompletedAppEvt<>(cmd, operation.getCreatedAt()))
-        .doOnNext(publisher::publishEvent)
-        .subscribe();
+    service.add(o)
+        .doOnNext(op -> publisher.publishEvent(new OperationCompletedAppEvt<>(cmd, op)))
+        .doOnError(t -> publisher.publishEvent(new OperationFailedAppEvt<>(cmd)))
+        .subscribe(e -> log.debug("Deposit completed for: {}", cmd));
   }
 }

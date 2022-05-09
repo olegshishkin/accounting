@@ -1,6 +1,7 @@
 package io.github.olegshishkin.accounting.accounts.jms;
 
 import io.github.olegshishkin.accounting.accounts.events.OperationCompletedAppEvt;
+import io.github.olegshishkin.accounting.accounts.events.OperationFailedAppEvt;
 import io.github.olegshishkin.accounting.accounts.events.OperationStartedAppEvt;
 import io.github.olegshishkin.accounting.operation.messages.commands.Header;
 import io.github.olegshishkin.accounting.operation.messages.commands.Header.HeaderBuilder;
@@ -9,25 +10,23 @@ import io.github.olegshishkin.accounting.operation.messages.events.OperationComp
 import io.github.olegshishkin.accounting.operation.messages.events.OperationStartedEvt;
 import io.github.olegshishkin.accounting.operation.messages.events.OperationStartedEvt.OperationStartedEvtBuilder;
 import java.time.Instant;
-import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 @Async
 @Slf4j
 @RequiredArgsConstructor
-public class MessageQueuePublishers {
+@Component
+public class ApplicationEventsListeners {
 
-  private final JmsTemplate jmsTemplate;
-  private final Map<String, String> queueNames;
+  private final MessageSender messageSender;
 
   @EventListener
   public void onOperationStarted(OperationStartedAppEvt<?> evt) {
-    log.info("Operation started: {}", evt.command());
     Header header = new HeaderBuilder()
         .withId(UUID.randomUUID().toString())
         .withTime(Instant.now())
@@ -36,22 +35,27 @@ public class MessageQueuePublishers {
         .withHeader(header)
         .withCommand(evt.command())
         .build();
-    String queue = queueNames.get(message.getClass().getSimpleName());
-    jmsTemplate.convertAndSend(queue, evt);
+    messageSender.send(message);
+    log.debug("Operation started notification sent: {}", message);
   }
 
   @EventListener
   public void onOperationCompleted(OperationCompletedAppEvt<?> evt) {
-    log.info("Operation completed: {}", evt.command());
     Header header = new HeaderBuilder()
         .withId(UUID.randomUUID().toString())
-        .withTime(evt.completedAt())
+        .withTime(evt.operation().getCreatedAt())
         .build();
     OperationCompletedEvt message = new OperationCompletedEvtBuilder()
         .withHeader(header)
         .withCommand(evt.command())
         .build();
-    String queue = queueNames.get(message.getClass().getSimpleName());
-    jmsTemplate.convertAndSend(queue, evt);
+    messageSender.send(message);
+    log.debug("Operation completed notification sent: {}", message);
+  }
+
+  @EventListener
+  public void onOperationError(OperationFailedAppEvt<?> evt) {
+    messageSender.send(evt.command());
+    log.debug("Operation failed notification sent: {}", evt.command());
   }
 }

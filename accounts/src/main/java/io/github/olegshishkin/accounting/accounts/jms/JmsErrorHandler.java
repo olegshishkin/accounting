@@ -10,6 +10,6 @@ public class JmsErrorHandler implements ErrorHandler {
 
   @Override
   public void handleError(Throwable t) {
-    log.error("Error for message : {}", t.getMessage());
+    log.error("An error occurred for message : {}", t.getMessage());
   }
 }

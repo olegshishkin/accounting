@@ -1,4 +1,4 @@
-package io.github.olegshishkin.accounting.operation.messages.events;
+package io.github.olegshishkin.accounting.operation.messages;
 
 public interface CommandAware {
 

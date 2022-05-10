@@ -4,8 +4,8 @@
   "title": "Operation started event",
   "type": "object",
   "javaInterfaces": [
-    "io.github.olegshishkin.accounting.operation.messages.events.Event",
-    "io.github.olegshishkin.accounting.operation.messages.events.CommandAware"
+    "io.github.olegshishkin.accounting.operation.messages.Event",
+    "io.github.olegshishkin.accounting.operation.messages.CommandAware"
   ],
   "required": [
     "header",

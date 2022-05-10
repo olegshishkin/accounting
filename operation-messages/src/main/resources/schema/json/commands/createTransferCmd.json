@@ -4,8 +4,8 @@
   "title": "Command of a transfer operation creation",
   "type": "object",
   "javaInterfaces": [
-    "io.github.olegshishkin.accounting.operation.messages.events.Command",
-    "io.github.olegshishkin.accounting.operation.messages.events.TransactionIdAware"
+    "io.github.olegshishkin.accounting.operation.messages.Command",
+    "io.github.olegshishkin.accounting.operation.messages.TransactionIdAware"
   ],
   "required": [
     "header",

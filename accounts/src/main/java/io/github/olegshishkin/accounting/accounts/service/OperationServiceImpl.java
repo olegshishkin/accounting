@@ -22,7 +22,6 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
 @Service
 public class OperationServiceImpl implements OperationService {
 
@@ -30,15 +29,16 @@ public class OperationServiceImpl implements OperationService {
   private final OperationRepository operationRepository;
   private final OperationMapper operationMapper;
 
+  @Transactional(readOnly = true)
   @Override
   public Flux<OperationDTO> find(OperationFilterDTO dto) {
-    Example<Operation> example = Example.of(operationMapper.map(dto));
+    var example = Example.of(operationMapper.map(dto));
     return operationRepository.findAll(example).map(operationMapper::map);
   }
 
   @Override
-  public Mono<Operation> add(Operation o) {
-    String accountId = o.getAccount().getId();
+  public Mono<Operation> addPlusOperation(Operation o) {
+    var accountId = o.getAccount().getId();
     return ops.update(Account.class)
         .matching(query(where("id").is(accountId)))
         .apply(new Update().inc("balance", o.getAmount()))

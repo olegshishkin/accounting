@@ -10,5 +10,5 @@ public interface OperationService {
 
   Flux<OperationDTO> find(OperationFilterDTO dto);
 
-  Mono<Operation> add(Operation operation);
+  Mono<Operation> addPlusOperation(Operation operation);
 }

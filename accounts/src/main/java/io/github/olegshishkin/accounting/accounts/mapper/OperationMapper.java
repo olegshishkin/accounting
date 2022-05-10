@@ -4,6 +4,8 @@ import io.github.olegshishkin.accounting.accounts.model.Operation;
 import io.github.olegshishkin.accounting.accounts.model.graphql.OperationDTO;
 import io.github.olegshishkin.accounting.accounts.model.graphql.OperationFilterDTO;
 import io.github.olegshishkin.accounting.operation.messages.commands.CreateDepositCmd;
+import io.github.olegshishkin.accounting.operation.messages.commands.CreateWithdrawalCmd;
+import java.math.BigDecimal;
 import java.time.Instant;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -21,11 +23,22 @@ public interface OperationMapper {
 
   @Mapping(target = "messageId", source = "header.id")
   @Mapping(target = "account.id", source = "accountId")
-  @Mapping(target = "createdAt", source = "cmd", qualifiedByName = "now")
+  @Mapping(target = "createdAt", source = "header.id", qualifiedByName = "now")
   Operation map(CreateDepositCmd cmd);
 
+  @Mapping(target = "messageId", source = "header.id")
+  @Mapping(target = "account.id", source = "accountId")
+  @Mapping(target = "createdAt", source = "header.id", qualifiedByName = "now")
+  @Mapping(target = "amount", source = "amount", qualifiedByName = "invert")
+  Operation map(CreateWithdrawalCmd cmd);
+
   @Named("now")
-  default Instant now(CreateDepositCmd cmd) {
+  default Instant now(String unimportant) {
     return Instant.now();
+  }
+
+  @Named("invert")
+  default BigDecimal invert(BigDecimal number) {
+    return number.negate();
   }
 }

@@ -3,11 +3,8 @@ package io.github.olegshishkin.accounting.accounts.jms;
 import io.github.olegshishkin.accounting.accounts.events.OperationCompletedAppEvt;
 import io.github.olegshishkin.accounting.accounts.events.OperationFailedAppEvt;
 import io.github.olegshishkin.accounting.accounts.events.OperationStartedAppEvt;
-import io.github.olegshishkin.accounting.operation.messages.commands.Header;
 import io.github.olegshishkin.accounting.operation.messages.commands.Header.HeaderBuilder;
-import io.github.olegshishkin.accounting.operation.messages.events.OperationCompletedEvt;
 import io.github.olegshishkin.accounting.operation.messages.events.OperationCompletedEvt.OperationCompletedEvtBuilder;
-import io.github.olegshishkin.accounting.operation.messages.events.OperationStartedEvt;
 import io.github.olegshishkin.accounting.operation.messages.events.OperationStartedEvt.OperationStartedEvtBuilder;
 import java.time.Instant;
 import java.util.UUID;
@@ -27,11 +24,11 @@ public class ApplicationEventsListeners {
 
   @EventListener
   public void onOperationStarted(OperationStartedAppEvt<?> evt) {
-    Header header = new HeaderBuilder()
+    var header = new HeaderBuilder()
         .withId(UUID.randomUUID().toString())
         .withTime(Instant.now())
         .build();
-    OperationStartedEvt message = new OperationStartedEvtBuilder()
+    var message = new OperationStartedEvtBuilder()
         .withHeader(header)
         .withCommand(evt.command())
         .build();
@@ -41,11 +38,11 @@ public class ApplicationEventsListeners {
 
   @EventListener
   public void onOperationCompleted(OperationCompletedAppEvt<?> evt) {
-    Header header = new HeaderBuilder()
+    var header = new HeaderBuilder()
         .withId(UUID.randomUUID().toString())
         .withTime(evt.operation().getCreatedAt())
         .build();
-    OperationCompletedEvt message = new OperationCompletedEvtBuilder()
+    var message = new OperationCompletedEvtBuilder()
         .withHeader(header)
         .withCommand(evt.command())
         .build();

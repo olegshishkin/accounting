@@ -34,7 +34,7 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
   public Mono<AccountDTO> create(AccountInputDTO dto) {
-    Account account = mapper.merge(dto, Account.create());
+    var account = mapper.merge(dto, Account.create());
     return repository.save(account)
         .map(mapper::map);
   }

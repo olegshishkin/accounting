@@ -29,6 +29,8 @@
   <properties>
     <revision>0.0.1</revision>
     <java.version>17</java.version>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
     <jib.skip>true</jib.skip>
     <jib.from.image>openjdk:${java.version}-jdk-alpine</jib.from.image>
 
@@ -131,8 +133,6 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven.compiler.plugin.version}</version>
           <configuration>
-            <source>${java.version}</source>
-            <target>${java.version}</target>
             <encoding>UTF-8</encoding>
           </configuration>
         </plugin>

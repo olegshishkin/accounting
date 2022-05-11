@@ -36,12 +36,12 @@
       "description": "UpdateWithdrawalCmd message queue name."
     },
     {
-      "name": "message.queue.OperationCompletedEvt",
+      "name": "message.queue.ExecutionCompletedEvt",
       "type": "java.lang.String",
       "description": "OperationCompletedEvt message queue name."
     },
     {
-      "name": "message.queue.OperationStartedEvt",
+      "name": "message.queue.ExecutionStartedEvt",
       "type": "java.lang.String",
       "description": "OperationStartedEvt message queue name."
     }

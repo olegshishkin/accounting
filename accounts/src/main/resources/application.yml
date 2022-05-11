@@ -23,5 +23,5 @@ message:
     UpdateDepositCmd: UpdateDepositQueue
     UpdateTransferCmd: UpdateTransferQueue
     UpdateWithdrawalCmd: UpdateWithdrawalQueue
-    OperationCompletedEvt: OperationCompletedQueue
-    OperationStartedEvt: OperationStartedQueue
+    ExecutionCompletedEvt: ExecutionCompletedQueue
+    ExecutionStartedEvt: ExecutionStartedQueue

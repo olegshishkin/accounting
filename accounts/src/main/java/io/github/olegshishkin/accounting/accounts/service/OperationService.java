@@ -10,5 +10,7 @@ public interface OperationService {
 
   Flux<OperationDTO> find(OperationFilterDTO dto);
 
-  Mono<Operation> addPlusOperation(Operation operation);
+  Mono<Operation> deposit(Operation operation);
+
+  Mono<Operation> withdraw(Operation operation);
 }

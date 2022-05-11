@@ -29,14 +29,14 @@ public class MessageQueueListeners {
   @JmsListener(destination = "${message.queue.CreateDepositCmd}")
   public void consumeCreateDepositQueue(CreateDepositCmd cmd) {
     log.debug("Create deposit for {}", cmd);
-    handle(mapper::map, service::addPlusOperation, cmd)
+    handle(mapper::map, service::deposit, cmd)
         .subscribe(o -> log.debug("Deposit completed for {}", cmd));
   }
 
   @JmsListener(destination = "${message.queue.CreateWithdrawalCmd}")
   public void consumeCreateWithdrawalQueue(CreateWithdrawalCmd cmd) {
     log.debug("Create withdrawal for {}", cmd);
-    handle(mapper::map, service::addPlusOperation, cmd)
+    handle(mapper::map, service::withdraw, cmd)
         .subscribe(o -> log.debug("Withdrawal completed for {}", cmd));
   }
 

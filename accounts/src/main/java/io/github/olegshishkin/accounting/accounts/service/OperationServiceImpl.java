@@ -37,7 +37,7 @@ public class OperationServiceImpl implements OperationService {
   }
 
   @Override
-  public Mono<Operation> addPlusOperation(Operation o) {
+  public Mono<Operation> deposit(Operation o) {
     var accountId = o.getAccount().getId();
     return ops.update(Account.class)
         .matching(query(where("id").is(accountId)))
@@ -47,5 +47,10 @@ public class OperationServiceImpl implements OperationService {
         .switchIfEmpty(Mono.error(() -> new IllegalArgumentException("No account " + accountId)))
         .doOnNext(account -> o.getAccount().setName(account.getName()))
         .then(ops.insert(o));
+  }
+
+  @Override
+  public Mono<Operation> withdraw(Operation operation) {
+    return deposit(operation);
   }
 }

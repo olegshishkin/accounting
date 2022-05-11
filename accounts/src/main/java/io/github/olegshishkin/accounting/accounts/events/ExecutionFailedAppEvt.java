@@ -3,11 +3,11 @@ package io.github.olegshishkin.accounting.accounts.events;
 import io.github.olegshishkin.accounting.operation.messages.Command;
 
 /**
- * Application context event. Emitted when operation starts.
+ * Application context event. Emitted when an execution failed due to an error.
  *
- * @param command source operation command.
+ * @param command command.
  * @param <T>     command type.
  */
-public record OperationStartedAppEvt<T extends Command>(T command) {
+public record ExecutionFailedAppEvt<T extends Command>(T command) {
 
 }

@@ -9,6 +9,7 @@ import io.github.olegshishkin.accounting.accounts.model.Operation;
 import io.github.olegshishkin.accounting.accounts.model.graphql.OperationDTO;
 import io.github.olegshishkin.accounting.accounts.model.graphql.OperationFilterDTO;
 import io.github.olegshishkin.accounting.accounts.repository.OperationRepository;
+import io.github.olegshishkin.accounting.accounts.service.dto.Transfer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 @Service
 public class OperationServiceImpl implements OperationService {
 
@@ -52,5 +54,11 @@ public class OperationServiceImpl implements OperationService {
   @Override
   public Mono<Operation> withdraw(Operation operation) {
     return deposit(operation);
+  }
+
+  @Override
+  public Mono<Transfer> transfer(Transfer transfer) {
+    return withdraw(transfer.from())
+        .zipWith(deposit(transfer.to()), Transfer::new);
   }
 }

@@ -19,7 +19,7 @@ message:
     CreateDepositCmd: CreateDepositQueue
     CreateTransferCmd: CreateTransferQueue
     CreateWithdrawalCmd: CreateWithdrawalQueue
-    DeleteCmd: DeleteQueue
+    CancelCmd: CancelQueue
     UpdateDepositCmd: UpdateDepositQueue
     UpdateTransferCmd: UpdateTransferQueue
     UpdateWithdrawalCmd: UpdateWithdrawalQueue

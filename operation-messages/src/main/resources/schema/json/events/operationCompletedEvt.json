@@ -40,7 +40,7 @@
           "$ref": "../commands/updateWithdrawalCmd.json"
         },
         {
-          "$ref": "../commands/deleteCmd.json"
+          "$ref": "../commands/cancelCmd.json"
         }
       ]
     }

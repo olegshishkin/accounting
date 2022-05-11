@@ -16,9 +16,9 @@
       "description": "CreateWithdrawalCmd message queue name."
     },
     {
-      "name": "message.queue.DeleteCmd",
+      "name": "message.queue.CancelCmd",
       "type": "java.lang.String",
-      "description": "DeleteCmd message queue name."
+      "description": "CancelCmd message queue name."
     },
     {
       "name": "message.queue.UpdateDepositCmd",

@@ -94,7 +94,7 @@ class MessageQueueListenersTest {
         .build();
 
     // when
-    listeners.handle(mapper::map, service::addPlusOperation, cmd).block();
+    listeners.handle(mapper::map, service::deposit, cmd).block();
 
     // then
     StepVerifier.create(ops.query(Operation.class).all())
@@ -127,7 +127,7 @@ class MessageQueueListenersTest {
         .build();
 
     // when
-    listeners.handle(mapper::map, service::addPlusOperation, cmd).block();
+    listeners.handle(mapper::map, service::deposit, cmd).block();
 
     // then
     StepVerifier.create(ops.query(Operation.class).all())

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "/schemas/commands/account/transaction/cancelTransactionCmd",
+  "title": "Transaction cancel command",
+  "javaInterfaces": [
+    "io.github.olegshishkin.accounting.accounts.messages.Command"
+  ],
+  "type": "object",
+  "required": [
+    "header",
+    "transactionId"
+  ],
+  "properties": {
+    "header": {
+      "$ref": "../header.json"
+    },
+    "transactionId": {
+      "$ref": "../definitions.json#/definitions/transactionId"
+    }
+  },
+  "additionalProperties": false
+}

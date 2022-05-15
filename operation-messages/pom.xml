@@ -25,9 +25,6 @@
       <plugin>
         <groupId>org.jsonschema2pojo</groupId>
         <artifactId>jsonschema2pojo-maven-plugin</artifactId>
-        <configuration>
-          <targetPackage>${project.groupId}.operation.messages</targetPackage>
-        </configuration>
       </plugin>
     </plugins>
   </build>

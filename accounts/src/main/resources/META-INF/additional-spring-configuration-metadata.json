@@ -1,49 +1,24 @@
 {
   "properties": [
     {
-      "name": "message.queue.CreateDepositCmd",
+      "name": "message.queue.ApplyTransactionCmd",
       "type": "java.lang.String",
-      "description": "CreateDepositCmd message queue name."
+      "description": "ApplyTransactionCmd message queue name."
     },
     {
-      "name": "message.queue.CreateTransferCmd",
+      "name": "message.queue.CancelTransactionCmd",
       "type": "java.lang.String",
-      "description": "CreateTransferCmd message queue name."
-    },
-    {
-      "name": "message.queue.CreateWithdrawalCmd",
-      "type": "java.lang.String",
-      "description": "CreateWithdrawalCmd message queue name."
-    },
-    {
-      "name": "message.queue.CancelCmd",
-      "type": "java.lang.String",
-      "description": "CancelCmd message queue name."
-    },
-    {
-      "name": "message.queue.UpdateDepositCmd",
-      "type": "java.lang.String",
-      "description": "UpdateDepositCmd message queue name."
-    },
-    {
-      "name": "message.queue.UpdateTransferCmd",
-      "type": "java.lang.String",
-      "description": "UpdateTransferCmd message queue name."
-    },
-    {
-      "name": "message.queue.UpdateWithdrawalCmd",
-      "type": "java.lang.String",
-      "description": "UpdateWithdrawalCmd message queue name."
+      "description": "CancelTransactionCmd message queue name."
     },
     {
       "name": "message.queue.ExecutionCompletedEvt",
       "type": "java.lang.String",
-      "description": "OperationCompletedEvt message queue name."
+      "description": "ExecutionCompletedEvt message queue name."
     },
     {
       "name": "message.queue.ExecutionStartedEvt",
       "type": "java.lang.String",
-      "description": "OperationStartedEvt message queue name."
+      "description": "ExecutionStartedEvt message queue name."
     }
   ]
 }

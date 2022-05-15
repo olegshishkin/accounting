@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "/schemas/events/account/transaction/executionCompletedEvt",
+  "title": "Execution completed event",
+  "type": "object",
+  "javaInterfaces": [
+    "io.github.olegshishkin.accounting.accounts.messages.Event"
+  ],
+  "required": [
+    "header",
+    "completedAt",
+    "command"
+  ],
+  "properties": {
+    "header": {
+      "$ref": "../header.json"
+    },
+    "completedAt": {
+      "title": "Execution completion time",
+      "format": "date-time"
+    },
+    "command": {
+      "oneOf": [
+        {
+          "$ref": "../commands/applyTransactionCmd.json"
+        },
+        {
+          "$ref": "../commands/cancelTransactionCmd.json"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

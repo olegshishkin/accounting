@@ -86,7 +86,6 @@
         <groupId>com.amazonaws</groupId>
         <artifactId>amazon-sqs-java-messaging-lib</artifactId>
         <version>${aws.sqs.jms.lib.version}</version>
-        <type>jar</type>
       </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>
@@ -175,8 +174,9 @@
             </execution>
           </executions>
           <configuration>
-            <sourceDirectory>${basedir}/src/main/resources/schema/json</sourceDirectory>
+            <sourceDirectory>${basedir}/src/main/resources/schemas</sourceDirectory>
             <dateTimeType>java.time.Instant</dateTimeType>
+            <dateType>java.time.LocalDate</dateType>
             <generateBuilders>true</generateBuilders>
             <includeAdditionalProperties>false</includeAdditionalProperties>
             <includeAllPropertiesConstructor>false</includeAllPropertiesConstructor>

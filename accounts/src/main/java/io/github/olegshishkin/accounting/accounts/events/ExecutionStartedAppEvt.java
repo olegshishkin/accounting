@@ -1,6 +1,6 @@
 package io.github.olegshishkin.accounting.accounts.events;
 
-import io.github.olegshishkin.accounting.operation.messages.Command;
+import io.github.olegshishkin.accounting.accounts.messages.Command;
 import java.time.Instant;
 
 /**

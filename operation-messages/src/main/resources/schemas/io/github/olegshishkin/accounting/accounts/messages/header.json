@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "/schemas/commands/account/header",
+  "title": "Header schema",
+  "type": "object",
+  "required": [
+    "id",
+    "time"
+  ],
+  "properties": {
+    "id": {
+      "title": "Message identifier",
+      "$ref": "#/definitions/identifier"
+    },
+    "correlationId": {
+      "title": "Message identifier specified by the id property of the original message",
+      "$ref": "#/definitions/identifier"
+    },
+    "time": {
+      "title": "Message time",
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "definitions": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-f\\d]{4}(?:[a-f\\d]{4}-){4}[a-f\\d]{12}$"
+    }
+  },
+  "additionalProperties": false
+}

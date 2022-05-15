@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "/schemas/commands/account/transaction/entry",
+  "title": "Transaction entry",
+  "type": "object",
+  "required": [
+    "accountId",
+    "amount"
+  ],
+  "properties": {
+    "accountId": {
+      "title": "Account identifier",
+      "type": "string",
+      "minLength": 1
+    },
+    "type": {
+      "title": "Entry type",
+      "type": "string",
+      "enum": ["DEPOSIT", "WITHDRAWAL"]
+    },
+    "amount": {
+      "title": "Entry amount",
+      "type": "number",
+      "exclusiveMinimum": 0
+    }
+  },
+  "additionalProperties": false
+}

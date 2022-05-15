@@ -1,6 +1,6 @@
 package io.github.olegshishkin.accounting.accounts.events;
 
-import io.github.olegshishkin.accounting.operation.messages.Command;
+import io.github.olegshishkin.accounting.accounts.messages.Command;
 
 /**
  * Application context event. Emitted when an execution failed due to an error.

@@ -1,8 +1,7 @@
 package io.github.olegshishkin.accounting.accounts.events;
 
-import io.github.olegshishkin.accounting.accounts.model.Operation;
-import io.github.olegshishkin.accounting.accounts.service.dto.Transfer;
-import io.github.olegshishkin.accounting.operation.messages.Command;
+import io.github.olegshishkin.accounting.accounts.messages.Command;
+import io.github.olegshishkin.accounting.accounts.service.dto.Transaction;
 import java.time.Instant;
 
 /**
@@ -12,19 +11,9 @@ import java.time.Instant;
  * @param completedAt completion moment.
  * @param <T>         command type.
  */
-public record ExecutionCompletedAppEvt<T extends Command, R>(T command, Instant completedAt) {
+public record ExecutionCompletedAppEvt<T extends Command>(T command, Instant completedAt) {
 
-  public ExecutionCompletedAppEvt(T command, R result) {
-    this(command, getCompletionMoment(result));
-  }
-
-  private static <R> Instant getCompletionMoment(R r) {
-    if (r instanceof Operation o) {
-      return o.getCreatedAt();
-    }
-    if (r instanceof Transfer t) {
-      return t.from().getCreatedAt();
-    }
-    throw new IllegalArgumentException("Unknown type: " + r.getClass());
+  public ExecutionCompletedAppEvt(T command, Transaction transaction) {
+    this(command, transaction.time());
   }
 }

@@ -16,12 +16,7 @@ cloud:
 message:
   concurrency: 10
   queue:
-    CreateDepositCmd: CreateDepositQueue
-    CreateTransferCmd: CreateTransferQueue
-    CreateWithdrawalCmd: CreateWithdrawalQueue
-    CancelCmd: CancelQueue
-    UpdateDepositCmd: UpdateDepositQueue
-    UpdateTransferCmd: UpdateTransferQueue
-    UpdateWithdrawalCmd: UpdateWithdrawalQueue
+    ApplyTransactionCmd: ApplyTransactionQueue
+    CancelTransactionCmd: CancelTransactionQueue
     ExecutionCompletedEvt: ExecutionCompletedQueue
     ExecutionStartedEvt: ExecutionStartedQueue

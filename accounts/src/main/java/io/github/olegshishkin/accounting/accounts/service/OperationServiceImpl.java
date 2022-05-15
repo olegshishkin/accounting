@@ -4,16 +4,14 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 import io.github.olegshishkin.accounting.accounts.mapper.OperationMapper;
-import io.github.olegshishkin.accounting.accounts.model.Account;
 import io.github.olegshishkin.accounting.accounts.model.Operation;
 import io.github.olegshishkin.accounting.accounts.model.graphql.OperationDTO;
 import io.github.olegshishkin.accounting.accounts.model.graphql.OperationFilterDTO;
 import io.github.olegshishkin.accounting.accounts.repository.OperationRepository;
-import io.github.olegshishkin.accounting.accounts.service.dto.Transfer;
+import io.github.olegshishkin.accounting.accounts.service.dto.Transaction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
-import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.ReactiveMongoOperations;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
@@ -28,37 +26,46 @@ import reactor.core.publisher.Mono;
 public class OperationServiceImpl implements OperationService {
 
   private final ReactiveMongoOperations ops;
-  private final OperationRepository operationRepository;
-  private final OperationMapper operationMapper;
+  private final OperationRepository repository;
+  private final OperationMapper mapper;
+  private final AccountService accountService;
 
   @Transactional(readOnly = true)
   @Override
   public Flux<OperationDTO> find(OperationFilterDTO dto) {
-    var example = Example.of(operationMapper.map(dto));
-    return operationRepository.findAll(example).map(operationMapper::map);
+    var example = Example.of(mapper.map(dto));
+    return repository.findAll(example).map(mapper::map);
   }
 
   @Override
-  public Mono<Operation> deposit(Operation o) {
-    var accountId = o.getAccount().getId();
-    return ops.update(Account.class)
-        .matching(query(where("id").is(accountId)))
-        .apply(new Update().inc("balance", o.getAmount()))
-        .withOptions(FindAndModifyOptions.options().returnNew(true))
-        .findAndModify()
-        .switchIfEmpty(Mono.error(() -> new IllegalArgumentException("No account " + accountId)))
-        .doOnNext(account -> o.getAccount().setName(account.getName()))
-        .then(ops.insert(o));
+  public Mono<Transaction> execute(Transaction tx) {
+    return repository.findAllByMessageId(tx.messageId())
+        .switchIfEmpty(cancel(tx).thenMany(apply(tx)))
+        .collectList()
+        .map(Transaction::new);
   }
 
   @Override
-  public Mono<Operation> withdraw(Operation operation) {
-    return deposit(operation);
+  public Mono<Void> cancel(Transaction tx) {
+    var query = query(where("transactionId").is(tx.txId()).and("cancellation").isNull());
+    query.fields().include("account.id", "amount");
+    var update = new Update().set("cancellation", mapper.mapCancellation(tx));
+    return ops.find(query, Operation.class)
+        .flatMap(o -> {
+          var accountId = o.getAccount().getId();
+          var diff = o.getAmount().negate();
+          return accountService.changeBalance(accountId, diff);
+        })
+        .then(ops.updateMulti(query, update, Operation.class))
+        .then();
   }
 
-  @Override
-  public Mono<Transfer> transfer(Transfer transfer) {
-    return withdraw(transfer.from())
-        .zipWith(deposit(transfer.to()), Transfer::new);
+  private Flux<Operation> apply(Transaction tx) {
+    return Flux.fromIterable(tx.ops())
+        .flatMap(o -> {
+          var accountId = o.getAccount().getId();
+          return accountService.changeBalance(accountId, o.getAmount()).doOnNext(o::setAccountName);
+        })
+        .thenMany(ops.insertAll(tx.ops()));
   }
 }

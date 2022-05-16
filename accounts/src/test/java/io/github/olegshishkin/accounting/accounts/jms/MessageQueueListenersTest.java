@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 
@@ -14,11 +15,13 @@ import io.github.olegshishkin.accounting.accounts.mapper.AccountMapperImpl;
 import io.github.olegshishkin.accounting.accounts.mapper.OperationMapper;
 import io.github.olegshishkin.accounting.accounts.mapper.OperationMapperImpl;
 import io.github.olegshishkin.accounting.accounts.messages.commands.ApplyTransactionCmd.ApplyTransactionCmdBuilder;
+import io.github.olegshishkin.accounting.accounts.messages.commands.CancelTransactionCmd.CancelTransactionCmdBuilder;
 import io.github.olegshishkin.accounting.accounts.messages.commands.Entry.EntryBuilder;
 import io.github.olegshishkin.accounting.accounts.messages.commands.Entry.Type;
 import io.github.olegshishkin.accounting.accounts.messages.commands.Header.HeaderBuilder;
 import io.github.olegshishkin.accounting.accounts.model.Account;
 import io.github.olegshishkin.accounting.accounts.model.Operation;
+import io.github.olegshishkin.accounting.accounts.model.Operation.OperationAccount;
 import io.github.olegshishkin.accounting.accounts.repository.AccountRepository;
 import io.github.olegshishkin.accounting.accounts.repository.OperationRepository;
 import io.github.olegshishkin.accounting.accounts.service.AccountService;
@@ -122,7 +125,8 @@ class MessageQueueListenersTest {
             o.getTransactionId().equals(cmd.getTransactionId()) &&
                 o.getAccount().getName().equals(account.getName()) &&
                 o.getAmount().equals(BigDecimal.valueOf(2.3)) &&
-                o.getCreatedAt() != null)
+                o.getCreatedAt() != null &&
+                o.getCancellation() == null)
         .verifyComplete();
 
     StepVerifier.create(ops.query(Account.class).all())
@@ -164,7 +168,8 @@ class MessageQueueListenersTest {
             o.getTransactionId().equals(cmd.getTransactionId()) &&
                 o.getAccount().getName().equals(account.getName()) &&
                 o.getAmount().equals(BigDecimal.valueOf(-2.2)) &&
-                o.getCreatedAt() != null)
+                o.getCreatedAt() != null &&
+                o.getCancellation() == null)
         .verifyComplete();
 
     StepVerifier.create(ops.query(Account.class).all())
@@ -223,12 +228,14 @@ class MessageQueueListenersTest {
     assertEquals(source.getName(), withdrawal.getAccount().getName());
     assertEquals(BigDecimal.valueOf(-0.52), withdrawal.getAmount());
     assertNotNull(withdrawal.getCreatedAt());
+    assertNull(withdrawal.getCancellation());
 
     var deposit = operations.get(dest.getId());
     assertEquals(cmd.getTransactionId(), deposit.getTransactionId());
     assertEquals(dest.getName(), deposit.getAccount().getName());
     assertEquals(BigDecimal.valueOf(0.52), deposit.getAmount());
     assertNotNull(deposit.getCreatedAt());
+    assertNull(deposit.getCancellation());
 
     var balances = ops.query(Account.class)
         .all()
@@ -238,6 +245,404 @@ class MessageQueueListenersTest {
 
     assertEquals(2, balances.size());
     assertThat(balances, containsInAnyOrder(BigDecimal.valueOf(1.98), BigDecimal.valueOf(2.02)));
+  }
+
+  @Test
+  void updateDeposit() {
+    // given
+    var account = Account.create();
+    account.setName("accName1");
+    account.setBalance(account.getBalance().add(BigDecimal.valueOf(4.5)));
+    var savedAccount = ops.insert(account).block();
+    assert savedAccount != null;
+
+    var operation = new Operation();
+    operation.setMessageId("id1");
+    operation.setCreatedAt(Instant.now());
+    operation.setAmount(BigDecimal.valueOf(3.7));
+    operation.setTransactionId("trans1");
+    operation.setDate(LocalDate.now());
+    var operationAcc = new OperationAccount();
+    operationAcc.setId(account.getId());
+    operationAcc.setName(account.getName());
+    operation.setAccount(operationAcc);
+    var savedOperation = ops.insert(operation).block();
+    assert savedOperation != null;
+
+    var cmd = new ApplyTransactionCmdBuilder()
+        .withHeader(
+            new HeaderBuilder()
+                .withId("id2")
+                .withCorrelationId("corr2")
+                .withTime(Instant.now())
+                .build())
+        .withDate(LocalDate.now())
+        .withTransactionId("trans1")
+        .build();
+    cmd.getEntries().add(new EntryBuilder()
+        .withAccountId(savedAccount.getId())
+        .withType(Type.DEPOSIT)
+        .withAmount(BigDecimal.valueOf(0.3))
+        .build());
+
+    // when
+    listeners.handle(operationMapper::map, operationService::execute, cmd).block();
+
+    // then
+    StepVerifier.create(ops.query(Operation.class).all())
+        .expectNextMatches(o ->
+            o.getTransactionId().equals(cmd.getTransactionId()) &&
+                o.getAccount().getName().equals(account.getName()) &&
+                o.getAmount().equals(BigDecimal.valueOf(3.7)) &&
+                o.getCreatedAt() != null &&
+                o.getMessageId().equals(operation.getMessageId()) &&
+                o.getCancellation() != null &&
+                o.getCancellation().getMessageId().equals(cmd.getHeader().getId()))
+        .expectNextMatches(o ->
+            o.getTransactionId().equals(cmd.getTransactionId()) &&
+                o.getAccount().getName().equals(account.getName()) &&
+                o.getAmount().equals(BigDecimal.valueOf(0.3)) &&
+                o.getCreatedAt() != null &&
+                o.getMessageId().equals(cmd.getHeader().getId()) &&
+                o.getCancellation() == null)
+        .verifyComplete();
+
+    StepVerifier.create(ops.query(Account.class).all())
+        .expectNextMatches(a -> a.getBalance().equals(BigDecimal.valueOf(1.1)))
+        .verifyComplete();
+  }
+
+  @Test
+  void updateWithdrawal() {
+    // given
+    var account = Account.create();
+    account.setName("accName1");
+    account.setBalance(account.getBalance().add(BigDecimal.valueOf(7.5)));
+    var savedAccount = ops.insert(account).block();
+    assert savedAccount != null;
+
+    var operation = new Operation();
+    operation.setMessageId("id1");
+    operation.setCreatedAt(Instant.now());
+    operation.setAmount(BigDecimal.valueOf(-1.24));
+    operation.setTransactionId("trans1");
+    operation.setDate(LocalDate.now());
+    var operationAcc = new OperationAccount();
+    operationAcc.setId(account.getId());
+    operationAcc.setName(account.getName());
+    operation.setAccount(operationAcc);
+    var savedOperation = ops.insert(operation).block();
+    assert savedOperation != null;
+
+    var cmd = new ApplyTransactionCmdBuilder()
+        .withHeader(
+            new HeaderBuilder()
+                .withId("id2")
+                .withCorrelationId("corr2")
+                .withTime(Instant.now())
+                .build())
+        .withDate(LocalDate.now())
+        .withTransactionId("trans1")
+        .build();
+    cmd.getEntries().add(new EntryBuilder()
+        .withAccountId(savedAccount.getId())
+        .withType(Type.WITHDRAWAL)
+        .withAmount(BigDecimal.valueOf(4.3))
+        .build());
+
+    // when
+    listeners.handle(operationMapper::map, operationService::execute, cmd).block();
+
+    // then
+    StepVerifier.create(ops.query(Operation.class).all())
+        .expectNextMatches(o ->
+            o.getTransactionId().equals(cmd.getTransactionId()) &&
+                o.getAccount().getName().equals(account.getName()) &&
+                o.getAmount().equals(BigDecimal.valueOf(-1.24)) &&
+                o.getCreatedAt() != null &&
+                o.getMessageId().equals(operation.getMessageId()) &&
+                o.getCancellation() != null &&
+                o.getCancellation().getMessageId().equals(cmd.getHeader().getId())
+        )
+        .expectNextMatches(o ->
+            o.getTransactionId().equals(cmd.getTransactionId()) &&
+                o.getAccount().getName().equals(account.getName()) &&
+                o.getAmount().equals(BigDecimal.valueOf(-4.3)) &&
+                o.getCreatedAt() != null &&
+                o.getMessageId().equals(cmd.getHeader().getId()) &&
+                o.getCancellation() == null)
+        .verifyComplete();
+
+    StepVerifier.create(ops.query(Account.class).all())
+        .expectNextMatches(a -> a.getBalance().equals(BigDecimal.valueOf(4.44)))
+        .verifyComplete();
+  }
+
+  @Test
+  void updateTransfer() {
+    // given
+    var source = Account.create();
+    source.setName("accName1");
+    source.setBalance(source.getBalance().add(BigDecimal.valueOf(6.9)));
+
+    var dest = Account.create();
+    dest.setName("accName2");
+    dest.setBalance(dest.getBalance().add(BigDecimal.valueOf(0.45)));
+
+    var accounts = ops.insertAll(List.of(source, dest)).toStream().toList();
+    assert accounts.size() == 2;
+
+    var today = LocalDate.now();
+    var now = Instant.now();
+    var operationSrc = new Operation();
+    operationSrc.setMessageId("id1");
+    operationSrc.setCreatedAt(now);
+    operationSrc.setAmount(BigDecimal.valueOf(-3.21));
+    operationSrc.setTransactionId("trans1");
+    operationSrc.setDate(today);
+    var operationAccSrc = new OperationAccount();
+    operationAccSrc.setId(source.getId());
+    operationAccSrc.setName(source.getName());
+    operationSrc.setAccount(operationAccSrc);
+
+    var operationDest = new Operation();
+    operationDest.setMessageId("id1");
+    operationDest.setCreatedAt(now);
+    operationDest.setAmount(BigDecimal.valueOf(3.21));
+    operationDest.setTransactionId("trans1");
+    operationDest.setDate(today);
+    var operationAccDest = new OperationAccount();
+    operationAccDest.setId(dest.getId());
+    operationAccDest.setName(dest.getName());
+    operationDest.setAccount(operationAccDest);
+
+    var savedOperations = ops.insertAll(List.of(operationSrc, operationDest)).toStream().toList();
+    assert savedOperations.size() == 2;
+
+    var cmd = new ApplyTransactionCmdBuilder()
+        .withHeader(
+            new HeaderBuilder()
+                .withId("id2")
+                .withCorrelationId("corr2")
+                .withTime(Instant.now())
+                .build())
+        .withDate(LocalDate.now())
+        .withTransactionId("trans1")
+        .build();
+    cmd.getEntries().add(new EntryBuilder()
+        .withAccountId(source.getId())
+        .withType(Type.WITHDRAWAL)
+        .withAmount(BigDecimal.valueOf(8.2))
+        .build());
+    cmd.getEntries().add(new EntryBuilder()
+        .withAccountId(dest.getId())
+        .withType(Type.DEPOSIT)
+        .withAmount(BigDecimal.valueOf(8.2))
+        .build());
+
+    // when
+    listeners.handle(operationMapper::map, operationService::execute, cmd).block();
+
+    // then
+    var operations = ops.query(Operation.class)
+        .all()
+        .map(Operation::getAmount)
+        .toStream()
+        .toList();
+
+    assertEquals(4, operations.size());
+    assertThat(operations, containsInAnyOrder(BigDecimal.valueOf(3.21),
+        BigDecimal.valueOf(-3.21),
+        BigDecimal.valueOf(8.2),
+        BigDecimal.valueOf(-8.2)));
+
+    var balances = ops.query(Account.class)
+        .all()
+        .toStream()
+        .map(Account::getBalance)
+        .toList();
+
+    assertEquals(2, balances.size());
+    assertThat(balances, containsInAnyOrder(BigDecimal.valueOf(1.91), BigDecimal.valueOf(5.44)));
+  }
+
+  @Test
+  void cancelDeposit() {
+    // given
+    var account = Account.create();
+    account.setName("accName1");
+    account.setBalance(account.getBalance().add(BigDecimal.valueOf(4.5)));
+    var savedAccount = ops.insert(account).block();
+    assert savedAccount != null;
+
+    var operation = new Operation();
+    operation.setMessageId("id1");
+    operation.setCreatedAt(Instant.now());
+    operation.setAmount(BigDecimal.valueOf(3.7));
+    operation.setTransactionId("trans1");
+    operation.setDate(LocalDate.now());
+    var operationAcc = new OperationAccount();
+    operationAcc.setId(account.getId());
+    operationAcc.setName(account.getName());
+    operation.setAccount(operationAcc);
+    var savedOperation = ops.insert(operation).block();
+    assert savedOperation != null;
+
+    var cmd = new CancelTransactionCmdBuilder()
+        .withHeader(
+            new HeaderBuilder()
+                .withId("id2")
+                .withCorrelationId("corr2")
+                .withTime(Instant.now())
+                .build())
+        .withTransactionId("trans1")
+        .build();
+
+    // when
+    listeners.handle(operationMapper::map, operationService::cancel, cmd).block();
+
+    // then
+    StepVerifier.create(ops.query(Operation.class).all())
+        .expectNextMatches(o ->
+            o.getTransactionId().equals(cmd.getTransactionId()) &&
+                o.getAccount().getName().equals(account.getName()) &&
+                o.getAmount().equals(BigDecimal.valueOf(3.7)) &&
+                o.getCreatedAt() != null &&
+                o.getMessageId().equals(operation.getMessageId()) &&
+                o.getCancellation() != null &&
+                o.getCancellation().getMessageId().equals(cmd.getHeader().getId()))
+        .verifyComplete();
+
+    StepVerifier.create(ops.query(Account.class).all())
+        .expectNextMatches(a -> a.getBalance().equals(BigDecimal.valueOf(0.8)))
+        .verifyComplete();
+  }
+
+  @Test
+  void cancelWithdrawal() {
+    // given
+    var account = Account.create();
+    account.setName("accName1");
+    account.setBalance(account.getBalance().add(BigDecimal.valueOf(7.5)));
+    var savedAccount = ops.insert(account).block();
+    assert savedAccount != null;
+
+    var operation = new Operation();
+    operation.setMessageId("id1");
+    operation.setCreatedAt(Instant.now());
+    operation.setAmount(BigDecimal.valueOf(-1.24));
+    operation.setTransactionId("trans1");
+    operation.setDate(LocalDate.now());
+    var operationAcc = new OperationAccount();
+    operationAcc.setId(account.getId());
+    operationAcc.setName(account.getName());
+    operation.setAccount(operationAcc);
+    var savedOperation = ops.insert(operation).block();
+    assert savedOperation != null;
+
+    var cmd = new CancelTransactionCmdBuilder()
+        .withHeader(
+            new HeaderBuilder()
+                .withId("id2")
+                .withCorrelationId("corr2")
+                .withTime(Instant.now())
+                .build())
+        .withTransactionId("trans1")
+        .build();
+
+    // when
+    listeners.handle(operationMapper::map, operationService::cancel, cmd).block();
+
+    // then
+    StepVerifier.create(ops.query(Operation.class).all())
+        .expectNextMatches(o ->
+            o.getTransactionId().equals(cmd.getTransactionId()) &&
+                o.getAccount().getName().equals(account.getName()) &&
+                o.getAmount().equals(BigDecimal.valueOf(-1.24)) &&
+                o.getCreatedAt() != null &&
+                o.getMessageId().equals(operation.getMessageId()) &&
+                o.getCancellation() != null &&
+                o.getCancellation().getMessageId().equals(cmd.getHeader().getId())
+        )
+        .verifyComplete();
+
+    StepVerifier.create(ops.query(Account.class).all())
+        .expectNextMatches(a -> a.getBalance().equals(BigDecimal.valueOf(8.74)))
+        .verifyComplete();
+  }
+
+  @Test
+  void cancelTransfer() {
+    // given
+    var source = Account.create();
+    source.setName("accName1");
+    source.setBalance(source.getBalance().add(BigDecimal.valueOf(6.9)));
+
+    var dest = Account.create();
+    dest.setName("accName2");
+    dest.setBalance(dest.getBalance().add(BigDecimal.valueOf(0.45)));
+
+    var accounts = ops.insertAll(List.of(source, dest)).toStream().toList();
+    assert accounts.size() == 2;
+
+    var today = LocalDate.now();
+    var now = Instant.now();
+    var operationSrc = new Operation();
+    operationSrc.setMessageId("id1");
+    operationSrc.setCreatedAt(now);
+    operationSrc.setAmount(BigDecimal.valueOf(-3.21));
+    operationSrc.setTransactionId("trans1");
+    operationSrc.setDate(today);
+    var operationAccSrc = new OperationAccount();
+    operationAccSrc.setId(source.getId());
+    operationAccSrc.setName(source.getName());
+    operationSrc.setAccount(operationAccSrc);
+
+    var operationDest = new Operation();
+    operationDest.setMessageId("id1");
+    operationDest.setCreatedAt(now);
+    operationDest.setAmount(BigDecimal.valueOf(3.21));
+    operationDest.setTransactionId("trans1");
+    operationDest.setDate(today);
+    var operationAccDest = new OperationAccount();
+    operationAccDest.setId(dest.getId());
+    operationAccDest.setName(dest.getName());
+    operationDest.setAccount(operationAccDest);
+
+    var savedOperations = ops.insertAll(List.of(operationSrc, operationDest)).toStream().toList();
+    assert savedOperations.size() == 2;
+
+    var cmd = new CancelTransactionCmdBuilder()
+        .withHeader(
+            new HeaderBuilder()
+                .withId("id2")
+                .withCorrelationId("corr2")
+                .withTime(Instant.now())
+                .build())
+        .withTransactionId("trans1")
+        .build();
+
+    // when
+    listeners.handle(operationMapper::map, operationService::cancel, cmd).block();
+
+    // then
+    var operations = ops.query(Operation.class)
+        .all()
+        .map(Operation::getAmount)
+        .toStream()
+        .toList();
+
+    assertEquals(2, operations.size());
+    assertThat(operations, containsInAnyOrder(BigDecimal.valueOf(3.21), BigDecimal.valueOf(-3.21)));
+
+    var balances = ops.query(Account.class)
+        .all()
+        .toStream()
+        .map(Account::getBalance)
+        .toList();
+
+    assertEquals(2, balances.size());
+    assertThat(balances, containsInAnyOrder(BigDecimal.valueOf(10.11), BigDecimal.valueOf(-2.76)));
   }
 
   @TestConfiguration

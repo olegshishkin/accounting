@@ -1,8 +1,10 @@
 package io.github.olegshishkin.accounting.accounts.service;
 
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
+import static org.springframework.data.relational.core.query.Criteria.where;
+import static org.springframework.data.relational.core.query.Query.query;
+import static org.springframework.data.relational.core.query.Update.update;
 
+import io.github.olegshishkin.accounting.accounts.mapper.CancellationMapper;
 import io.github.olegshishkin.accounting.accounts.mapper.OperationMapper;
 import io.github.olegshishkin.accounting.accounts.model.Operation;
 import io.github.olegshishkin.accounting.accounts.model.graphql.OperationDTO;
@@ -12,10 +14,11 @@ import io.github.olegshishkin.accounting.accounts.service.dto.Transaction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
-import org.springframework.data.mongodb.core.ReactiveMongoOperations;
-import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -25,16 +28,20 @@ import reactor.core.publisher.Mono;
 @Service
 public class OperationServiceImpl implements OperationService {
 
-  private final ReactiveMongoOperations ops;
+  //  private final ReactiveMongoOperations ops;
+  private final R2dbcEntityOperations ops;
+//  private final DatabaseClient dbClient;
+//  private final TransactionalOperator txOp;
   private final OperationRepository repository;
-  private final OperationMapper mapper;
+  private final OperationMapper operationMapper;
+  private final CancellationMapper cancellationMapper;
   private final AccountService accountService;
 
   @Transactional(readOnly = true)
   @Override
   public Flux<OperationDTO> find(OperationFilterDTO dto) {
-    var example = Example.of(mapper.map(dto));
-    return repository.findAll(example).map(mapper::map);
+    var example = Example.of(operationMapper.map(dto));
+    return repository.findAll(example).map(operationMapper::map);
   }
 
   @Override
@@ -47,25 +54,24 @@ public class OperationServiceImpl implements OperationService {
 
   @Override
   public Mono<Void> cancel(Transaction tx) {
-    var query = query(where("transactionId").is(tx.txId()).and("cancellation").isNull());
-    query.fields().include("account.id", "amount");
-    var update = new Update().set("cancellation", mapper.mapCancellation(tx));
-    return ops.find(query, Operation.class)
-        .flatMap(o -> {
-          var accountId = o.getAccount().getId();
-          var diff = o.getAmount().negate();
-          return accountService.changeBalance(accountId, diff);
-        })
-        .then(ops.updateMulti(query, update, Operation.class))
+    var query = query(where("transaction_id").is(tx.txId()).and("cancellation_id").isNull());
+    return ops.select(Operation.class)
+        .matching(query.columns("account_id", "amount"))
+        .all()
+        .flatMap(this::updateBalance)
+        .then(ops.update(Operation.class)
+            .matching(query)
+            .apply(update("cancellation", cancellationMapper.map(tx))))
         .then();
   }
 
   private Flux<Operation> apply(Transaction tx) {
     return Flux.fromIterable(tx.ops())
-        .flatMap(o -> {
-          var accountId = o.getAccount().getId();
-          return accountService.changeBalance(accountId, o.getAmount()).doOnNext(o::setAccountName);
-        })
-        .thenMany(ops.insertAll(tx.ops()));
+        .flatMap(ops::insert)
+        .flatMap(o -> updateBalance(o).thenReturn(o));
+  }
+
+  private Mono<Void> updateBalance(Operation o) {
+    return accountService.changeBalance(o.getAccount().getId(), o.getAmount());
   }
 }

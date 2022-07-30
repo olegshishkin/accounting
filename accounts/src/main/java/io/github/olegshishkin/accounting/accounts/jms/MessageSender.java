@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public record MessageSender(JmsTemplate jmsTemplate, Map<String, String> queueNames) {
 
   public void send(Object message) {
-    jmsTemplate.convertAndSend(getQueue(message), message);
+//    jmsTemplate.convertAndSend(getQueue(message), message);
   }
 
   private String getQueue(Object message) {

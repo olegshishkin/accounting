@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+  <changeSet id="1.0.0.3" author="Oleg Shishkin">
+    <tagDatabase tag="1.0.0.3"/>
+  </changeSet>
+
+  <changeSet id="1.0.0.3_create_cancellation_table" author="Oleg Shishkin">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="cancellation"/>
+      </not>
+    </preConditions>
+
+    <createTable tableName="cancellation">
+      <column name="id" type="bigserial">
+        <constraints primaryKey="true"/>
+      </column>
+      <column name="message_id" type="varchar(36)">
+        <constraints nullable="false" />
+      </column>
+      <column name="time" type="timestamp with timezone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+</databaseChangeLog>

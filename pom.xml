@@ -48,6 +48,8 @@
     <maven.resources.plugin.version>3.2.0</maven.resources.plugin.version>
     <graphql.codegen.plugin.version>5.4.0</graphql.codegen.plugin.version>
     <jsonschema2pojo.plugin.version>1.1.2</jsonschema2pojo.plugin.version>
+    <liquibase.plugin.version>4.2.2</liquibase.plugin.version>
+    <liquibase.plugin.postgresql.version>42.3.4</liquibase.plugin.postgresql.version>
     <jib.plugin.version>3.2.1</jib.plugin.version>
   </properties>
 
@@ -215,6 +217,23 @@
               </ports>
             </container>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.liquibase</groupId>
+          <artifactId>liquibase-maven-plugin</artifactId>
+          <version>${liquibase.plugin.version}</version>
+          <configuration>
+            <propertyFileWillOverride>true</propertyFileWillOverride>
+            <propertyFile>src/main/resources/db/liquibase.yml</propertyFile>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.postgresql</groupId>
+              <artifactId>postgresql</artifactId>
+              <version>${liquibase.plugin.postgresql.version}</version>
+              <scope>compile</scope>
+            </dependency>
+          </dependencies>
         </plugin>
       </plugins>
     </pluginManagement>

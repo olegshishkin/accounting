@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+  <changeSet id="1.0.0.1" author="Oleg Shishkin">
+    <tagDatabase tag="1.0.0.1"/>
+  </changeSet>
+
+  <changeSet id="1.0.0.1_create_account_table" author="Oleg Shishkin">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="account"/>
+      </not>
+    </preConditions>
+
+    <createTable tableName="account">
+      <column name="id" type="bigserial">
+        <constraints primaryKey="true"/>
+      </column>
+      <column name="name" type="varchar(32)">
+        <constraints nullable="false" />
+      </column>
+      <column name="balance" type="numeric(19,5)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="comment" type="varchar(250)"/>
+      <column name="disabled" type="boolean">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+</databaseChangeLog>

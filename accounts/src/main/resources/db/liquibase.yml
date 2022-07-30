@@ -1,0 +1,4 @@
+changeLogFile: src/main/resources/db/changelog/changelog.xml
+driver: org.postgresql.Driver
+verbose: true
+dropFirst: false

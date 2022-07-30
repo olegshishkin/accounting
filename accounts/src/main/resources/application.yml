@@ -1,7 +1,11 @@
 spring:
-  data:
-    mongodb:
-      uri: ${MONGO_URI} # Make sure to add replicaSet to the MongoDB URI
+  r2dbc:
+    url: ${DB_URL}
+    pool:
+      max-idle-time: 1m
+      validation-query: select 1
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWD}
   graphql:
     path:
 cloud:

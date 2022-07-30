@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+  <changeSet id="1.0.0.2" author="Oleg Shishkin">
+    <tagDatabase tag="1.0.0.2"/>
+  </changeSet>
+
+  <changeSet id="1.0.0.2_create_tag_table" author="Oleg Shishkin">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tag"/>
+      </not>
+    </preConditions>
+
+    <createTable tableName="tag">
+      <column name="id" type="bigserial">
+        <constraints primaryKey="true"/>
+      </column>
+      <column name="account_id" type="bigint">
+        <constraints nullable="false" references="account(id)" foreignKeyName="fk_tag_accnt" />
+      </column>
+      <column name="tag" type="varchar(32)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+</databaseChangeLog>

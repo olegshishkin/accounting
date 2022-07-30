@@ -1,6 +1,5 @@
 package io.github.olegshishkin.accounting.accounts.service;
 
-import io.github.olegshishkin.accounting.accounts.model.Account;
 import io.github.olegshishkin.accounting.accounts.model.graphql.AccountDTO;
 import io.github.olegshishkin.accounting.accounts.model.graphql.AccountInputDTO;
 import java.math.BigDecimal;
@@ -9,15 +8,15 @@ import reactor.core.publisher.Mono;
 
 public interface AccountService {
 
-  Mono<AccountDTO> findById(String id);
+  Mono<AccountDTO> findById(Long id);
 
   Flux<AccountDTO> findAll();
 
   Mono<AccountDTO> create(AccountInputDTO dto);
 
-  Mono<AccountDTO> update(String id, AccountInputDTO dto);
+  Mono<AccountDTO> update(Long id, AccountInputDTO dto);
 
-  Mono<AccountDTO> close(String id);
+  Mono<AccountDTO> close(Long id);
 
   /**
    * Deposit or withdraw from an account.
@@ -27,5 +26,5 @@ public interface AccountService {
    * @return saved account.
    * @throws IllegalArgumentException if the account is not found.
    */
-  Mono<Account> changeBalance(String id, BigDecimal difference);
+  Mono<Void> changeBalance(Long id, BigDecimal difference);
 }

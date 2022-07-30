@@ -1,7 +1,7 @@
 package io.github.olegshishkin.accounting.accounts.service;
 
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
+import static org.springframework.data.relational.core.query.Criteria.where;
+import static org.springframework.data.relational.core.query.Query.query;
 
 import io.github.olegshishkin.accounting.accounts.mapper.AccountMapper;
 import io.github.olegshishkin.accounting.accounts.model.Account;
@@ -11,9 +11,9 @@ import io.github.olegshishkin.accounting.accounts.repository.AccountRepository;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mongodb.core.FindAndModifyOptions;
-import org.springframework.data.mongodb.core.ReactiveMongoOperations;
-import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
+import org.springframework.data.relational.core.query.Update;
+import org.springframework.r2dbc.connection.R2dbcTransactionManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -27,10 +27,11 @@ public class AccountServiceImpl implements AccountService {
 
   private final AccountRepository repository;
   private final AccountMapper mapper;
-  private final ReactiveMongoOperations ops;
+  private final R2dbcEntityOperations ops;
+  private final R2dbcTransactionManager m;
 
   @Override
-  public Mono<AccountDTO> findById(String id) {
+  public Mono<AccountDTO> findById(Long id) {
     return repository.findById(id)
         .map(mapper::map);
   }
@@ -49,7 +50,7 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public Mono<AccountDTO> update(String id, AccountInputDTO dto) {
+  public Mono<AccountDTO> update(Long id, AccountInputDTO dto) {
     return repository.findById(id)
         .map(i -> mapper.merge(dto, i))
         .flatMap(repository::save)
@@ -57,7 +58,7 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public Mono<AccountDTO> close(String id) {
+  public Mono<AccountDTO> close(Long id) {
     return repository.findById(id)
         .map(this::close)
         .flatMap(repository::save)
@@ -65,13 +66,13 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public Mono<Account> changeBalance(String id, BigDecimal difference) {
-    return ops.update(Account.class)
-        .matching(query(where("id").is(id)))
-        .apply(new Update().inc("balance", difference))
-        .withOptions(FindAndModifyOptions.options().returnNew(true))
-        .findAndModify()
-        .switchIfEmpty(Mono.error(() -> new IllegalArgumentException("No account " + id)));
+  public Mono<Void> changeBalance(Long id, BigDecimal difference) {
+    return repository.updateBalance(id, difference);
+//    return repository.findById(id)
+//        .doOnNext(a -> a.setBalance(a.getBalance().add(difference)))
+//        .flatMap(repository::save)
+//        .switchIfEmpty(Mono.error(() -> new IllegalArgumentException("No account " + id)))
+//        .then();
   }
 
   private Account close(Account account) {

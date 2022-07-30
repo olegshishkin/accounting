@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+  <changeSet id="1.0.0.4" author="Oleg Shishkin">
+    <tagDatabase tag="1.0.0.4"/>
+  </changeSet>
+
+  <changeSet id="1.0.0.4_create_operation_table" author="Oleg Shishkin">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="operation"/>
+      </not>
+    </preConditions>
+
+    <createTable tableName="operation">
+      <column name="id" type="bigserial">
+        <constraints primaryKey="true"/>
+      </column>
+      <column name="created_at" type="timestamp">
+        <constraints nullable="false" />
+      </column>
+      <column name="date" type="date">
+        <constraints nullable="false" />
+      </column>
+      <column name="transaction_id" type="varchar(36)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="message_id" type="varchar(36)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="account_id" type="bigint">
+        <constraints nullable="false" references="account(id)" foreignKeyName="fk_opertn_accnt" />
+      </column>
+      <column name="amount" type="numeric(19,5)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="cancellation_id" type="bigint">
+        <constraints references="cancellation(id)" foreignKeyName="fk_opertn_cancltn" />
+      </column>
+      <column name="version" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+</databaseChangeLog>

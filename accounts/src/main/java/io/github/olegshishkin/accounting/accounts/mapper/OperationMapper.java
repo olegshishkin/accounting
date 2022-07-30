@@ -7,7 +7,6 @@ import io.github.olegshishkin.accounting.accounts.messages.commands.ApplyTransac
 import io.github.olegshishkin.accounting.accounts.messages.commands.CancelTransactionCmd;
 import io.github.olegshishkin.accounting.accounts.messages.commands.Entry;
 import io.github.olegshishkin.accounting.accounts.model.Operation;
-import io.github.olegshishkin.accounting.accounts.model.Operation.Cancellation;
 import io.github.olegshishkin.accounting.accounts.model.graphql.OperationDTO;
 import io.github.olegshishkin.accounting.accounts.model.graphql.OperationFilterDTO;
 import io.github.olegshishkin.accounting.accounts.service.dto.Transaction;
@@ -17,14 +16,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface OperationMapper {
 
   Operation map(OperationDTO dto);
 
   OperationDTO map(Operation entity);
 
-  @Mapping(target = "account.id", source = "accountId")
   Operation map(OperationFilterDTO dto);
 
   @Mapping(target = "createdAt", source = "createdAt")
@@ -35,10 +33,8 @@ public interface OperationMapper {
   @Mapping(target = "amount", source = "entry", qualifiedByName = "amount")
   Operation map(Entry entry, ApplyTransactionCmd cmd, Instant createdAt);
 
-  Cancellation mapCancellation(Transaction tx);
-
   default Transaction map(ApplyTransactionCmd cmd) {
-    Instant now = now(null);
+    var now = now(null);
     return cmd.getEntries()
         .stream()
         .map(entry -> this.map(entry, cmd, now))
@@ -53,7 +49,7 @@ public interface OperationMapper {
 
   @Named("amount")
   default BigDecimal amount(Entry entry) {
-    final BigDecimal amount = entry.getAmount();
+    var amount = entry.getAmount();
     return switch (entry.getType()) {
       case DEPOSIT -> amount;
       case WITHDRAWAL -> amount.negate();

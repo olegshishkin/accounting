@@ -54,7 +54,7 @@ public class MessageQueueConfig {
   }
 
   @Bean
-  public SQSConnectionFactory connectionFactory(AmazonSQSAsync amazonSQSAsync) {
+  public SQSConnectionFactory sqsConnectionFactory(AmazonSQSAsync amazonSQSAsync) {
     return new SQSConnectionFactory(new ProviderConfiguration(), amazonSQSAsync);
   }
 
@@ -69,12 +69,12 @@ public class MessageQueueConfig {
 
   @Bean
   public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
-      SQSConnectionFactory connectionFactory,
+      SQSConnectionFactory sqsConnectionFactory,
       JmsErrorHandler errorHandler,
       MappingJackson2MessageConverter messageConverter) {
 
     DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-    factory.setConnectionFactory(connectionFactory);
+    factory.setConnectionFactory(sqsConnectionFactory);
     factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
     factory.setErrorHandler(errorHandler);
     factory.setMessageConverter(messageConverter);

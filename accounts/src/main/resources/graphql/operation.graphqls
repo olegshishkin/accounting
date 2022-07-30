@@ -18,5 +18,5 @@ type OperationAccount {
 
 input OperationFilter {
     transactionId: String
-    accountId: String
+    accountId: ID
 }
